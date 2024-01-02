@@ -1,0 +1,108 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                                     Vanda FX.mq5 |
+//|                      Developed by Forex Robot Easy Team          |
+//|                         Visit us at forexroboteasy.com            |
+//+------------------------------------------------------------------+
+
+// Indicator Input Parameters
+input ENUM_TIMEFRAMES Timeframe = PERIOD_H1;  // Default time frame
+input int Period = 14;                        // Period for calculating the indicator
+input double OverboughtLevel = 80;             // Overbought level
+input double OversoldLevel = 20;               // Oversold level
+
+// Indicator Buffer
+double TrendWaveBuffer[];
+
+//+------------------------------------------------------------------+
+//| Custom Indicator Initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Register the Indicator Buffer
+   SetIndexBuffer(0, TrendWaveBuffer, INDICATOR_DATA);
+
+   // Set Indicator Label
+   IndicatorSetString(INDICATOR_SHORTNAME, 'Vanda FX');
+
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom Indicator Calculation function                            |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
+{
+   int limit = rates_total - prev_calculated;
+
+   // Calculate the Trend Wave Indicator
+   for(int i = 0; i < limit; i++)
+   {
+      double highest = iHighest(NULL, Timeframe, MODE_HIGH, Period, i);
+      double lowest = iLowest(NULL, Timeframe, MODE_LOW, Period, i);
+      
+      if(highest == lowest)
+      {
+         TrendWaveBuffer[i] = 0;  // No trend movement
+      }
+      else
+      {
+         double closeBelowLowest = close[i] < lowest;
+         double closeAboveHighest = close[i] > highest;
+         
+         if(closeBelowLowest)
+         {
+            TrendWaveBuffer[i] = -1;  // Initiation of a downward wave
+         }
+         else if(closeAboveHighest)
+         {
+            TrendWaveBuffer[i] = 1;   // Initiation of an upward wave
+         }
+         else
+         {
+            TrendWaveBuffer[i] = 0;   // No trend movement
+         }
+      }
+   }
+
+   return(rates_total);
+}
+
+//+------------------------------------------------------------------+
+//| Expert Advisor Initialization function                           |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Add initialization code for Expert Advisor
+
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert Advisor Start function                                     |
+//+------------------------------------------------------------------+
+void OnStart()
+{
+   // Add main trading logic code here
+
+   return;
+}
+
+//+------------------------------------------------------------------+
+//| Expert Advisor Deinitialization function                         |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   // Add deinitialization code for Expert Advisor
+
+   return;
+}
